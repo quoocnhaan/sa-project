@@ -1,0 +1,19 @@
+syntax = "proto3";
+package payroll;
+option java_package = "com.example.grpc.payroll";
+option java_multiple_files = true;
+
+service PayrollService {
+  // Unary: Nhận 1 request, trả về 1 response
+  rpc GetCurrentSalary (SalaryRequest) returns (SalaryResponse);
+}
+
+message SalaryRequest {
+  int64 employee_id = 1;
+}
+
+message SalaryResponse {
+  double base_salary = 1;
+  string currency = 2;
+  string effective_from = 3;
+}

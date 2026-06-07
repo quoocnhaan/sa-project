@@ -1,0 +1,22 @@
+syntax = "proto3";
+package attendance;
+option java_package = "com.example.grpc.attendance";
+option java_multiple_files = true;
+
+service AttendanceService {
+  // Server Streaming: Thêm từ khóa 'stream' ở kết quả trả về
+  rpc StreamAttendanceRecords (AttendanceRequest) returns (stream AttendanceResponse);
+}
+
+message AttendanceRequest {
+  int64 employee_id = 1;
+  int32 month = 2;
+  int32 year = 3;
+}
+
+message AttendanceResponse {
+  string attendance_date = 1;
+  string check_in_time = 2;
+  string check_out_time = 3;
+  string status = 4;
+}
