@@ -40,6 +40,30 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional(readOnly = true)
+    public EmployeeResponse getMyProfile(Long id) {
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Employee not found with id: " + id
+                        ));
+
+        EmployeeResponse response = convertToResponse(employee);
+
+        if (employee.getDepartmentId() != null) {
+            DepartmentExternalDTO dept =
+                    departmentAdapter.getDepartment(
+                            employee.getDepartmentId()
+                    );
+
+            response.setDepartment(dept);
+        }
+
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeById(Long id) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
@@ -140,6 +164,24 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EmployeeResponse getEmployeeByUsername(String username) {
+        Employee employee = employeeRepository.findAll().stream()
+                .filter(e -> e.getEmail().toLowerCase().startsWith(username.toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Employee not found for username: " + username));
+        
+        EmployeeResponse response = convertToResponse(employee);
+        
+        if (employee.getDepartmentId() != null) {
+            DepartmentExternalDTO dept = departmentAdapter.getDepartment(employee.getDepartmentId());
+            response.setDepartment(dept);
+        }
+        
+        return response;
     }
 
     private EmployeeDTO convertToDTO(Employee employee) {

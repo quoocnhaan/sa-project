@@ -3,6 +3,8 @@ package com.example.payroll_service.controller;
 import com.example.payroll_service.entity.Payslip;
 import com.example.payroll_service.service.PayslipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,8 +47,10 @@ public class PayslipController {
         return "Payslip deleted successfully";
     }
 
-    @GetMapping("/mypayslip")
-    public Payslip getmyPayslip(){
-        return payslipService.getMyPayslip();
+    @GetMapping("/my-payslip")
+    public Payslip getmyPayslip(@AuthenticationPrincipal Jwt jwt){
+        Long employeeId =
+                ((Number) jwt.getClaim("id")).longValue();
+        return payslipService.getMyPayslip(employeeId);
     }
 }

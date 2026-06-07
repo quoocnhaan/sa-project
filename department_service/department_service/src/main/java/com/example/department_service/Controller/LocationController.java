@@ -8,6 +8,7 @@ import com.example.department_service.DTO.Response.DepartmentResponse;
 import com.example.department_service.Service.DepartmentService;
 import com.example.department_service.Service.LocationService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class LocationController {
     LocationService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<DepartmentLocationResponse> createNew(@RequestBody DepartmentLocationRequest request){
         return ApiResponse.<DepartmentLocationResponse>builder()
                 .result(service.createNew(request))
@@ -27,6 +29,7 @@ public class LocationController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<List<DepartmentLocationResponse>> getAll(){
         return ApiResponse.<List<DepartmentLocationResponse>>builder()
                 .result(service.getAll())
@@ -35,6 +38,7 @@ public class LocationController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<DepartmentLocationResponse> getById(@PathVariable int id){
         return ApiResponse.<DepartmentLocationResponse>builder()
                 .result(service.getById(id))
@@ -43,6 +47,7 @@ public class LocationController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<Void> deleteById(@PathVariable int id){
         service.delete(id);
         return ApiResponse.<Void>builder()

@@ -38,13 +38,8 @@ public class OvertimeRecordService {
         overtimeRecordRepository.deleteById(id);
     }
 
-    public OvertimeRecord getMyOvertime(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Number number = jwt.getClaim("id");
-        Long id = number.longValue();
-
-        OvertimeRecord record = overtimeRecordRepository.getWorkShiftByEmployeeId(id);
+    public OvertimeRecord getMyOvertime(Long employeeId){
+        OvertimeRecord record = overtimeRecordRepository.getWorkShiftByEmployeeId(employeeId);
         return record;
     }
 }

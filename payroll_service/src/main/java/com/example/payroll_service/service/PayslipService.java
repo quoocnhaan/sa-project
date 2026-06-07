@@ -37,14 +37,8 @@ public class PayslipService {
         payslipRepository.deleteById(id);
     }
 
-    public Payslip getMyPayslip(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-
-        Number claim = jwt.getClaim("id");
-        Long id = claim.longValue();
-
-        Payslip payslip = payslipRepository.findByEmployeeId(id);
+    public Payslip getMyPayslip(Long employeeId){
+        Payslip payslip = payslipRepository.findByEmployeeId(employeeId);
         return payslip;
     }
 }

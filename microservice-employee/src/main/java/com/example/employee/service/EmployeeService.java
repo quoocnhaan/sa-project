@@ -12,7 +12,9 @@ public interface EmployeeService {
     EmployeeDTO createEmployee(EmployeeDTO employeeDTO);
     EmployeeDTO updateEmployee(Long id, EmployeeDTO employeeDTO);
     void deleteEmployee(Long id);
+    EmployeeResponse getEmployeeByUsername(String username);
     
     boolean validateEmployee(Long id);
     Map<Long, Map<String, String>> getEmployeesSummary(List<Long> employeeIds);
+    EmployeeResponse getMyProfile(Long id);
 }

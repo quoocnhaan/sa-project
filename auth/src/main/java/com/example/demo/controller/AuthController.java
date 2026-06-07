@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,7 +45,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> loginRequest) {
 
-        // 1. Authenticate the user credentials
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.get("username"),
@@ -51,16 +52,24 @@ public class AuthController {
                 )
         );
 
-        // 2. Set authentication in context
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // 3. Generate JWT Token
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        // 4. Return token to the client
+        String role = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(auth ->
+                        auth.equals("ADMIN") ||
+                                auth.equals("HR") ||
+                                auth.equals("EMPLOYEE"))
+                .findFirst()
+                .orElse(null);
+
         return ResponseEntity.ok(Map.of(
                 "token", jwt,
-                "type", "Bearer"
+                "type", "Bearer",
+                "role", role
         ));
     }
 

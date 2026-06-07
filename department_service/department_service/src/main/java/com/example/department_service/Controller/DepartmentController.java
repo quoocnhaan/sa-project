@@ -5,6 +5,7 @@ import com.example.department_service.DTO.Response.ApiResponse;
 import com.example.department_service.DTO.Response.DepartmentResponse;
 import com.example.department_service.Service.DepartmentService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class DepartmentController {
     DepartmentService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<DepartmentResponse> createNew(@RequestBody DepartmentRequest request){
         return ApiResponse.<DepartmentResponse>builder()
                 .result(service.createNew(request))
@@ -24,6 +26,7 @@ public class DepartmentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<List<DepartmentResponse>> getAll(){
         return ApiResponse.<List<DepartmentResponse>>builder()
                 .result(service.getAll())
@@ -32,6 +35,7 @@ public class DepartmentController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<DepartmentResponse> getById(@PathVariable int id){
         return ApiResponse.<DepartmentResponse>builder()
                 .result(service.getById(id))
@@ -40,6 +44,7 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ApiResponse<Void> deleteById(@PathVariable int id){
         service.delete(id);
         return ApiResponse.<Void>builder()

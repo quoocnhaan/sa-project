@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,10 +33,14 @@ public class EmployeeController {
         this.service = service;
     }
 
-    // Test Unary Call (Lương)
-    @GetMapping("/{id}/salary")
-    public String getSalary(@PathVariable("id") long id) {
-        return integrationService.getEmployeeSalaryInfo(id);
+    @GetMapping("/my-salary")
+    public String getSalary(
+            @AuthenticationPrincipal Jwt jwt) {
+
+        Long employeeId =
+                ((Number) jwt.getClaim("id")).longValue();
+
+        return integrationService.getEmployeeSalaryInfo(employeeId);
     }
 
 
@@ -41,16 +48,36 @@ public class EmployeeController {
     @GetMapping("/{id}/attendance")
     public List<String> getAttendance(
             @PathVariable("id") long id)
- {
+    {
         return integrationService.getEmployeeAttendance(id);
+    }
+
+    @GetMapping("/my-attendance")
+    public List<String> getAttendance(
+            @AuthenticationPrincipal Jwt jwt) {
+
+        Long employeeId =
+                ((Number) jwt.getClaim("id")).longValue();
+
+        return integrationService.getEmployeeAttendance(employeeId);
     }
 
 
 
     @GetMapping
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
         logger.info("Request received: Fetching all employees");
         return ResponseEntity.ok(employeeService.getAllEmployees());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<EmployeeResponse> getMyProfile() {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        logger.info("Request received: Fetching profile for current user: '{}'", username);
+        EmployeeResponse employee = employeeService.getEmployeeByUsername(username);
+        return ResponseEntity.ok(employee);
     }
 
     @GetMapping("/{id}")
@@ -60,6 +87,7 @@ public class EmployeeController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employeeDTO) {
         logger.info("Request received: Creating new employee with code: {}", employeeDTO.getEmployeeCode());
         EmployeeDTO created = employeeService.createEmployee(employeeDTO);
@@ -67,6 +95,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<EmployeeDTO> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
         logger.info("Request received: Updating employee details for ID: {}", id);
         EmployeeDTO updated = employeeService.updateEmployee(id, employeeDTO);
@@ -74,15 +103,20 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         logger.info("Request received: Deleting employee with ID: {}", id);
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/myprofile")
-//    public ResponseEntity<EmployeeResponse> getMyProfile(){
-//        EmployeeResponse dto = service.getMyProfile();
-//        return ResponseEntity.ok(dto);
-//    }
+    @GetMapping("/my-profile")
+    public ResponseEntity<EmployeeResponse> getMyProfile(
+            @AuthenticationPrincipal Jwt jwt) {
+        Long employeeId =
+                ((Number) jwt.getClaim("id")).longValue();
+        EmployeeResponse dto = service.getMyProfile(employeeId);
+
+        return ResponseEntity.ok(dto);
+    }
 }

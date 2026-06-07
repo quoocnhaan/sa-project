@@ -3,6 +3,9 @@ package com.example.attendance_service.controller;
 import com.example.attendance_service.entity.OvertimeRecord;
 import com.example.attendance_service.service.OvertimeRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,8 +50,11 @@ public class OvertimeRecordController {
         return "Overtime record deleted successfully";
     }
 
-    @GetMapping("/myRecord")
-    public OvertimeRecord getMyOvertime(){
-        return overtimeRecordService.getMyOvertime();
+    @GetMapping("/my-ot")
+    public OvertimeRecord getMyOvertime( @AuthenticationPrincipal Jwt jwt){
+        Long employeeId =
+                ((Number) jwt.getClaim("id")).longValue();
+        return overtimeRecordService.getMyOvertime(employeeId);
     }
+
 }
