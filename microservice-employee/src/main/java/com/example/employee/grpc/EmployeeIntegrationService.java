@@ -44,7 +44,7 @@ public class EmployeeIntegrationService {
         } catch (Exception e) { // <-- Sửa thành bắt Exception chung
             System.err.println("Đã xảy ra lỗi: " + e.getClass().getName() + " - " + e.getMessage());
             e.printStackTrace();
-            return "Lỗi rùi!";
+            return "Lỗi!";
         }
     }
 

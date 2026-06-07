@@ -1,6 +1,7 @@
 package com.example.attendance_service.service;
 
 import com.example.attendance_service.entity.AttendanceRecord;
+import com.example.attendance_service.entity.AttendanceRecordRequest;
 import com.example.attendance_service.repository.AttendanceRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -50,5 +51,15 @@ public class AttendanceService {
     public List<AttendanceRecord> getAttendanceByEmployeeId(Long employeeId) {
         List<AttendanceRecord> record = attendanceRecordRepository.getAttendanceRecordsByEmployeeId(employeeId);
         return record;
+    }
+
+    public AttendanceRecord updateAttendanceByDate(Long employeeId, AttendanceRecordRequest request) {
+        AttendanceRecord record = attendanceRecordRepository
+                .findByEmployeeIdAndAttendanceDate(employeeId, request.getAttendanceDate())
+                .orElseThrow(() -> new RuntimeException("No clock-in record found for today!"));
+
+        record.setCheckOutTime(request.getCheckOutTime());
+
+        return attendanceRecordRepository.save(record);
     }
 }

@@ -1,13 +1,12 @@
 package com.example.employee.service;
 
 import com.example.employee.client.adapter.DepartmentAdapter;
-import com.example.employee.model.dto.DepartmentExternalDTO;
-import com.example.employee.model.dto.EmployeeAddressDTO;
-import com.example.employee.model.dto.EmployeeDTO;
-import com.example.employee.model.dto.EmployeeResponse;
+import com.example.employee.model.dto.*;
 import com.example.employee.model.entity.Employee;
 import com.example.employee.model.entity.EmployeeAddress;
+import com.example.employee.rabbitmq.RabbitMQConfig;
 import com.example.employee.repository.EmployeeRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,10 +23,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentAdapter departmentAdapter;
+    private final RabbitTemplate rabbitTemplate;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, DepartmentAdapter departmentAdapter) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, DepartmentAdapter departmentAdapter, RabbitTemplate rabbitTemplate) {
         this.employeeRepository = employeeRepository;
         this.departmentAdapter = departmentAdapter;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
@@ -90,6 +91,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         
         Employee employee = convertToEntity(employeeDTO);
         Employee saved = employeeRepository.save(employee);
+        EmployeeCreatedEvent event = new EmployeeCreatedEvent(saved.getId(), employee.getFirstName());
+
+        // 3. Publish message to RabbitMQ
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ROUTING_KEY,
+                event
+        );
+
         return convertToDTO(saved);
     }
 
